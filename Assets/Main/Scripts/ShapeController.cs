@@ -2,8 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
-using Unity.Collections;
-using Unity.Properties;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -11,7 +9,7 @@ public class ShapeController : MonoBehaviour
 {
     public static ShapeController Instance { get; private set; }
     
-    [SerializeField] List<GameObject> shapePrefabs;
+    [SerializeField] GameObject shapePrefabs;
     [SerializeField] List<Color> shapeColors;
 
     public Transform shapeBoxParent;
@@ -30,20 +28,22 @@ public class ShapeController : MonoBehaviour
         StartCoroutine(CreateShapes(0));
     }
 
-    public IEnumerator CreateShapes(int second)
+    public IEnumerator CreateShapes(float second)
     {
         yield return new WaitForSeconds(second);
         int shapeType = Random.Range(0, 3);
-        foreach (var place in shapePlaces)
-        {   
-            place.localScale = Vector3.zero;
-            Transform newShape = Instantiate(shapePrefabs[0], place).transform;
-            for (int i = 0; i < newShape.childCount; i++)
-            {
-                newShape.GetChild(i).GetComponent<Renderer>().material.color = shapeColors[Random.Range(0, 3)];
-            }
-            
-            place.DOScale(Vector3.one, .35f);
+
+        for (int i = 0; i < shapePlaces.Count; i++)
+        {
+             Transform newShape = Instantiate(shapePrefabs, shapePlaces[i]).transform;
+
+             for (int j = 0; j < newShape.childCount; j++)
+             {
+                 newShape.GetChild(j).GetComponent<Renderer>().material.color = shapeColors[Random.Range(0, 3)];
+             }
+             
+             yield return new WaitForSeconds(.1f);
+             shapePlaces[i].DOScale(Vector3.one, .35f);
         }
     }
 }

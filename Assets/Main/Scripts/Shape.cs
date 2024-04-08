@@ -53,8 +53,12 @@ public class Shape : MonoBehaviour
             if (ShapeController.Instance.moveCount == 3)
             {
                 ShapeController.Instance.moveCount = 0;
-                StartCoroutine(ShapeController.Instance.CreateShapes(2));
+                StartCoroutine(ShapeController.Instance.CreateShapes(1.5f));
             }
+
+            Transform oldPlace = transform.parent;
+            transform.SetParent(ShapeController.Instance.shapeBoxParent);
+            oldPlace.localScale = Vector3.zero;
         }
     #endregion
 
@@ -67,9 +71,19 @@ public class Shape : MonoBehaviour
             
             if (ownColor == otherColor)
             {
-                _mc.sharedMesh = transform.GetChild(1).GetComponent<MeshCollider>().sharedMesh;
-                Destroy(transform.GetChild(0).gameObject);
-                Destroy(other.transform.GetChild(0).gameObject);
+                Debug.Log(other.transform.childCount);
+                if (transform.childCount > 2) 
+                    _mc.sharedMesh = transform.GetChild(1).GetComponent<MeshCollider>().sharedMesh;
+                
+                if (transform.childCount != 2)
+                    Destroy(transform.GetChild(0).gameObject);
+                else
+                    Destroy(transform.gameObject);
+                
+                if (other.transform.childCount != 2)
+                    Destroy(other.transform.GetChild(0).gameObject);
+                else
+                    Destroy(other.transform.gameObject);
             }
         }
     }
