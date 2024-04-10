@@ -5,6 +5,9 @@ TagManager:
   serializedVersion: 2
   tags:
   - Shape
+  - MirrorWall
+  - WarningLine
+  - Ball
   layers:
   - Default
   - TransparentFX

@@ -3,13 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
+using UnityEngine.Rendering;
 using Random = UnityEngine.Random;
 
 public class ShapeController : MonoBehaviour
 {
     public static ShapeController Instance { get; private set; }
-    
-    [SerializeField] GameObject shapePrefabs;
+    [SerializeField] List<ShapeBody> shapePrefabs;
     [SerializeField] List<Color> shapeColors;
 
     public Transform shapeBoxParent;
@@ -25,25 +25,39 @@ public class ShapeController : MonoBehaviour
 
     private void Start()
     {
-        StartCoroutine(CreateShapes(0));
+        CreateShapes(0);
     }
 
-    public IEnumerator CreateShapes(float second)
+    public void CreateShapes(float second)
     {
-        yield return new WaitForSeconds(second);
+        StartCoroutine(WaitForSecond(second));
+    }
+
+    IEnumerator WaitForSecond(float sec)
+    {
+        yield return new WaitForSeconds(sec);
         int shapeType = Random.Range(0, 3);
 
         for (int i = 0; i < shapePlaces.Count; i++)
-        {
-             Transform newShape = Instantiate(shapePrefabs, shapePlaces[i]).transform;
+        { 
+            shapePlaces[i].localScale = Vector3.zero;
+                
+            int randomShapeBody = Random.Range(0, shapePrefabs[0].shapeBody.Count);
+            Transform newShape = Instantiate(shapePrefabs[0].shapeBody[randomShapeBody], shapePlaces[i]).transform;
 
-             for (int j = 0; j < newShape.childCount; j++)
-             {
-                 newShape.GetChild(j).GetComponent<Renderer>().material.color = shapeColors[Random.Range(0, 3)];
-             }
-             
-             yield return new WaitForSeconds(.1f);
-             shapePlaces[i].DOScale(Vector3.one, .35f);
+            for (int j = 0; j < newShape.childCount; j++)
+                newShape.GetChild(j).GetComponent<Renderer>().material.color = shapeColors[Random.Range(0, 3)];
+
+            yield return new WaitForSeconds(0.02f);
+            shapePlaces[i].DOScale(Vector3.one, .35f);
+            
+            moveCount = 3;
         }
     }
+}
+
+[Serializable]
+public class ShapeBody
+{
+    public List<GameObject> shapeBody;
 }

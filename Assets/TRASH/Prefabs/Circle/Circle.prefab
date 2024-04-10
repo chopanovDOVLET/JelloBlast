@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 3284855946816612910}
   m_Layer: 0
   m_Name: Circle
-  m_TagString: Shape
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -98,7 +98,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce11f86b7980af0409751d7989e87b92, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  forceMagnitude: 5
+  material: {fileID: 2100000, guid: 5c6c1dd15838893418d3b267aabbe7b9, type: 2}
+  forceMagnitude: 12
+  hasCandy: 1
+  childCount: 0
+  childInShape:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
 --- !u!1 &691518111946070152
 GameObject:
   m_ObjectHideFlags: 0

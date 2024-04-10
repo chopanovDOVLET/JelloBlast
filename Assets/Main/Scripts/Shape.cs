@@ -7,14 +7,22 @@ using Object = UnityEngine.Object;
 
 public class Shape : MonoBehaviour
 {
-    private Rigidbody _rb;
+    private LaserBeam beam;
+    private Rigidbody _rb; 
     private MeshCollider _mc;
     private Camera _camera;
     
     private Vector3 mouseDownPos;
+    private Vector3 direction;
     private bool isShoot;
+    private bool isTrajectory;
+    private bool colliderEnter;
 
+    [SerializeField] Material material;
     [SerializeField] float forceMagnitude = 5f;
+    [SerializeField] bool hasCandy;
+    public int childCount;
+    public List<Transform> childInShape;
 
     private void Start()
     {
@@ -22,12 +30,47 @@ public class Shape : MonoBehaviour
         _mc = GetComponent<MeshCollider>();
         _camera = Camera.main;
 
-        _mc.sharedMesh = transform.GetChild(0).GetComponent<MeshCollider>().sharedMesh;
+        childCount = transform.childCount;
+        for (int i = 0; i < childCount; i++)
+            childInShape[i] = transform.GetChild(i);
+
+        int childShapeCount = childInShape.Count;
+        for (int i = 0; i < childShapeCount - childCount; i++)
+            childInShape.RemoveAt(childCount);
+        
+        _mc.sharedMesh = childInShape[0].GetComponent<MeshCollider>().sharedMesh;
+        direction = transform.forward;
+        colliderEnter = false;
+        isTrajectory = false;
+    }
+
+    private void Update()
+    {
+        if (isTrajectory && !isShoot)
+        {
+            Destroy(GameObject.Find("Laser Beam"));
+            beam = new LaserBeam(transform.position, new Vector3(direction.x, 0, direction.z), material);
+        }
     }
 
     #region DragAndShoot
-        private void OnMouseDown() => mouseDownPos = GetMousePosition();
-        private void OnMouseUp() => Shoot(mouseDownPos - GetMousePosition());
+        private void OnMouseDown()
+        {
+            isTrajectory = true;
+            mouseDownPos = GetMousePosition();
+        }
+
+        private void OnMouseDrag()
+        {
+            direction = mouseDownPos - GetMousePosition();
+        }
+
+        private void OnMouseUp()
+        {
+            isTrajectory = false;
+            Destroy(GameObject.Find("Laser Beam"));
+            Shoot(mouseDownPos - GetMousePosition());
+        } 
         
         private Vector3 GetMousePosition()
         {
@@ -42,48 +85,64 @@ public class Shape : MonoBehaviour
 
         private void Shoot(Vector3 Force)
         {
-            if (isShoot || Force.z <= 0) 
-                return;
-
-            Vector3 velocity = new Vector3(Force.x, 0, Force.z) * forceMagnitude;
-            _rb.AddForce(velocity, ForceMode.Impulse);
-            isShoot = true;
-
-            ShapeController.Instance.moveCount++;
-            if (ShapeController.Instance.moveCount == 3)
+            if (!isShoot && Force.z > 0)
             {
-                ShapeController.Instance.moveCount = 0;
-                StartCoroutine(ShapeController.Instance.CreateShapes(1.5f));
-            }
+                Vector3 velocity = new Vector3(Force.x, 0, Force.z) * forceMagnitude;
+                _rb.AddForce(velocity, ForceMode.Impulse);
+                isShoot = true;
 
-            Transform oldPlace = transform.parent;
-            transform.SetParent(ShapeController.Instance.shapeBoxParent);
-            oldPlace.localScale = Vector3.zero;
+                ShapeController.Instance.moveCount--;
+                
+                if (ShapeController.Instance.moveCount < 1)
+                    ShapeController.Instance.CreateShapes(1.5f);
+                
+                transform.SetParent(ShapeController.Instance.shapeBoxParent);
+                gameObject.tag = "Shape";
+            }
         }
     #endregion
+
+    private void OnCollisionExit(Collision other)
+    {
+        if (other.collider.CompareTag("Shape")) 
+            colliderEnter = false;
+    }
 
     private void OnCollisionEnter(Collision other)
     {
         if (other.collider.CompareTag("Shape"))
         {
-            Color otherColor = other.transform.GetChild(0).GetComponent<Renderer>().material.color;
-            Color ownColor = transform.GetChild(0).GetComponent<Renderer>().material.color;
-            
-            if (ownColor == otherColor)
+            Shape otherShape = other.collider.GetComponent<Shape>();
+            if (childInShape.Count > 0 && otherShape.childInShape.Count > 0)
             {
-                Debug.Log(other.transform.childCount);
-                if (transform.childCount > 2) 
-                    _mc.sharedMesh = transform.GetChild(1).GetComponent<MeshCollider>().sharedMesh;
+                Color ownColor = childInShape[0].GetComponent<Renderer>().material.color;
+                Color otherColor = otherShape.childInShape[0].GetComponent<Renderer>().material.color;
                 
-                if (transform.childCount != 2)
-                    Destroy(transform.GetChild(0).gameObject);
-                else
-                    Destroy(transform.gameObject);
-                
-                if (other.transform.childCount != 2)
-                    Destroy(other.transform.GetChild(0).gameObject);
-                else
-                    Destroy(other.transform.gameObject);
+                if (ownColor == otherColor && !otherShape.colliderEnter)
+                {
+                    Debug.Log("Enter");
+
+                    colliderEnter = true;
+                    otherShape.colliderEnter = true;
+
+                    Destroy(childInShape[0].gameObject);
+                    Destroy(otherShape.childInShape[0].gameObject);
+                    
+                    childInShape.RemoveAt(0);
+                    otherShape.childInShape.RemoveAt(0);
+
+                    if (childInShape.Count == 1 && hasCandy) 
+                        Destroy(gameObject);
+                        
+                    if (otherShape.childInShape.Count == 1 && otherShape.hasCandy) 
+                        Destroy(otherShape.gameObject);
+
+                    if (childInShape.Count > 0 && otherShape.childInShape.Count > 0)
+                    {
+                        _mc.sharedMesh = childInShape[0].GetComponent<MeshCollider>().sharedMesh;
+                        otherShape._mc.sharedMesh = otherShape.childInShape[0].GetComponent<MeshCollider>().sharedMesh;
+                    } 
+                }
             }
         }
     }
