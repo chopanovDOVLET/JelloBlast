@@ -13,8 +13,8 @@ public class ShapeController : MonoBehaviour
     [SerializeField] List<Color> shapeColors;
 
     public Transform shapeBoxParent;
-    [SerializeField] Transform shapeParent;
-    [SerializeField] List<Transform> shapePlaces;
+    public List<Transform> shapePlaces;
+    public List<ParticleSystem> particles;
 
     public int moveCount;
 
@@ -36,7 +36,7 @@ public class ShapeController : MonoBehaviour
     IEnumerator WaitForSecond(float sec)
     {
         yield return new WaitForSeconds(sec);
-        int shapeType = Random.Range(0, 3);
+        int shapeRandom = Random.Range(0, 3);
 
         for (int i = 0; i < shapePlaces.Count; i++)
         { 
@@ -45,7 +45,7 @@ public class ShapeController : MonoBehaviour
             int randomShapeBody = Random.Range(0, shapePrefabs[0].shapeBody.Count);
             Transform newShape = Instantiate(shapePrefabs[0].shapeBody[randomShapeBody], shapePlaces[i]).transform;
 
-            for (int j = 0; j < newShape.childCount; j++)
+            for (int j = 0; j < newShape.childCount - 1; j++)
                 newShape.GetChild(j).GetComponent<Renderer>().material.color = shapeColors[Random.Range(0, 3)];
 
             yield return new WaitForSeconds(0.02f);

@@ -7,7 +7,7 @@ TagManager:
   - Shape
   - MirrorWall
   - WarningLine
-  - Ball
+  - ShapeInBox
   layers:
   - Default
   - TransparentFX
