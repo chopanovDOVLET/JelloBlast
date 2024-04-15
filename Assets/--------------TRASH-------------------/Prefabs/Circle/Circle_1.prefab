@@ -119,6 +119,7 @@ GameObject:
   - component: {fileID: 7785871660103638891}
   - component: {fileID: 2156561554460099799}
   - component: {fileID: 5085919279069144669}
+  - component: {fileID: 2985529750847900069}
   m_Layer: 0
   m_Name: Circle_3
   m_TagString: Untagged
@@ -213,6 +214,23 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 8314571269056883277, guid: 86867b9465913c74d8d0d553145f8394, type: 3}
+--- !u!114 &2985529750847900069
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3598978314360901298}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d214cacbc427dcc48996de3cb39a5a1b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Intensity: 20
+  Mass: 1
+  stiffness: 0.3
+  damping: 0.75
+  Sleep: 0
 --- !u!1 &7226368502158677349
 GameObject:
   m_ObjectHideFlags: 0
@@ -225,6 +243,7 @@ GameObject:
   - component: {fileID: 5611854659728614064}
   - component: {fileID: 6374732363822785852}
   - component: {fileID: 2626012698490135998}
+  - component: {fileID: 8979686628327569396}
   m_Layer: 0
   m_Name: Circle_2
   m_TagString: Untagged
@@ -319,6 +338,23 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 8999911773206952699, guid: 86867b9465913c74d8d0d553145f8394, type: 3}
+--- !u!114 &8979686628327569396
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7226368502158677349}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d214cacbc427dcc48996de3cb39a5a1b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Intensity: 20
+  Mass: 1
+  stiffness: 0.3
+  damping: 0.75
+  Sleep: 0
 --- !u!1 &8505526848973287165
 GameObject:
   m_ObjectHideFlags: 0
@@ -431,4 +467,3 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
-  particle: {fileID: 19894866, guid: 6062cf74dd326b146b31d28120ade333, type: 3}

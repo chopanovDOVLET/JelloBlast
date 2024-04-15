@@ -348,7 +348,7 @@ Camera:
   m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
-  m_FOVAxisMode: 1
+  m_FOVAxisMode: 0
   m_Iso: 200
   m_ShutterSpeed: 0.005
   m_Aperture: 16
@@ -368,7 +368,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 49.393234
+  field of view: 30
   orthographic: 0
   orthographic size: 5
   m_Depth: -1
@@ -394,13 +394,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.38268343, y: 0, z: 0, w: 0.92387956}
-  m_LocalPosition: {x: 0, y: 20, z: -24}
+  m_LocalRotation: {x: 0.32556805, y: 0, z: 0, w: 0.9455186}
+  m_LocalPosition: {x: 0, y: 27.5, z: -40}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 657224051}
-  m_LocalEulerAnglesHint: {x: 45, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 38, y: 0, z: 0}
 --- !u!114 &330585547
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1540,11 +1540,11 @@ SceneRoots:
   - {fileID: 511405332}
   - {fileID: 933755089}
   - {fileID: 46819058}
+  - {fileID: 1604884301}
+  - {fileID: 1459626597}
+  - {fileID: 509398040}
   - {fileID: 949366530}
   - {fileID: 34513722}
   - {fileID: 910047766}
   - {fileID: 381012030}
   - {fileID: 586233884}
-  - {fileID: 1604884301}
-  - {fileID: 1459626597}
-  - {fileID: 509398040}
