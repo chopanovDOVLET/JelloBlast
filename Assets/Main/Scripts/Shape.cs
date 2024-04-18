@@ -16,12 +16,15 @@ public class Shape : MonoBehaviour
     
     private Vector3 mouseDownPos;
     private Vector3 direction;
+    private float angle;
     private bool isShoot;
     private bool isTrajectory;
     private bool colliderEnter;
 
     [SerializeField] Material material;
     [SerializeField] float forceMagnitude = 5f;
+    public bool firstCollide;
+    public float minVelocity;
     public int childCount;
     public List<Transform> childInShape;
 
@@ -47,10 +50,16 @@ public class Shape : MonoBehaviour
 
     private void Update()
     {
-        if (isTrajectory && !isShoot && direction.z > 0)
+        
+    }
+
+    private void FixedUpdate()
+    {
+        if (_rb.velocity.magnitude < minVelocity && !firstCollide)
         {
-            Destroy(GameObject.Find("Laser Beam"));
-            beam = new LaserBeam(transform.position, new Vector3(direction.x, 0, direction.z), material);
+            Vector3 direction = _rb.velocity.normalized; // Normalize to get direction
+            Vector3 minimumVelocity = direction * minVelocity;
+            _rb.AddForce(minimumVelocity - _rb.velocity, ForceMode.VelocityChange);
         }
     }
 
@@ -68,6 +77,12 @@ public class Shape : MonoBehaviour
         private void OnMouseDrag()
         {
             direction = mouseDownPos - GetMousePosition();
+            
+            if (isTrajectory && !isShoot && direction.z > 0)
+            {
+                Destroy(GameObject.Find("Laser Beam"));
+                beam = new LaserBeam(transform.position, new Vector3(direction.x, 0, direction.z), material);
+            }
         }
 
         private void OnMouseUp()
@@ -90,13 +105,15 @@ public class Shape : MonoBehaviour
 
         private void Shoot(Vector3 Force)
         {
-            if (!isShoot && Force.z > 0)
+            if (!isShoot && !isShoot && Force.z > 0)
             {
                 Force = Vector3.ProjectOnPlane(Force, Vector3.up);
                 Vector3 velocity = new Vector3(Force.x, 0, Force.z) * forceMagnitude;
                 _rb.AddForce(velocity, ForceMode.Impulse);
-                _rb.constraints = RigidbodyConstraints.FreezePositionY;
-                _rb.freezeRotation = true;
+                _rb.constraints = RigidbodyConstraints.FreezeRotationX | 
+                                  RigidbodyConstraints.FreezeRotationY | 
+                                  RigidbodyConstraints.FreezePositionY;
+                //_rb.freezeRotation = true;
                 _mc.isTrigger = false;
                 isShoot = true;
 
@@ -118,6 +135,8 @@ public class Shape : MonoBehaviour
 
     private void OnCollisionEnter(Collision other)
     {
+        firstCollide = true;
+        StartCoroutine(EnableGravity());
         if (other.collider.CompareTag("ShapeInBox"))
         {
             Shape otherShape = other.collider.GetComponent<Shape>();
@@ -150,5 +169,11 @@ public class Shape : MonoBehaviour
                 }
             }
         }
+    }
+
+    IEnumerator EnableGravity()
+    {
+        yield return new WaitForSeconds(.75f);
+        _rb.useGravity = true;
     }
 }

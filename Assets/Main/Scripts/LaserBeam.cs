@@ -8,6 +8,7 @@ public class LaserBeam
     private GameObject laserObj;
     private LineRenderer laser;
     private List<Vector3> laserIndices = new List<Vector3>();
+    private bool isHitWall;
 
     public LaserBeam(Vector3 pos, Vector3 dir, Material material)
     {
@@ -23,24 +24,23 @@ public class LaserBeam
         this.laser.textureMode = LineTextureMode.Tile;
         this.laser.material = material;
 
-        CastRay(pos, dir, laser);
+        CastRay(pos, dir, laser, 30f);
     }
 
-    private void CastRay(Vector3 pos, Vector3 dir, LineRenderer laser)
+    private void CastRay(Vector3 pos, Vector3 dir, LineRenderer laser, float distance)
     {
         laserIndices.Add(new Vector3(pos.x, 0.08f, pos.z));
 
         Ray ray = new Ray(pos, dir);
         RaycastHit hit;
 
-        if (Physics.Raycast(ray, out hit, 30, 1))
+        if (Physics.Raycast(ray, out hit, distance, 1))
         {
-            laserIndices.Add(new Vector3(hit.point.x, 0.08f, hit.point.z));
-            UpdateLaser();
+            CheckHit(hit, dir, laser);
         }
         else
         {
-            Vector3 hitPos = ray.GetPoint(30);
+            Vector3 hitPos = ray.GetPoint(distance);
             laserIndices.Add(new Vector3(hitPos.x, 0.08f, hitPos.z));
             UpdateLaser();
         }
@@ -61,12 +61,13 @@ public class LaserBeam
 
     private void CheckHit(RaycastHit hitInfo, Vector3 direction, LineRenderer laser)
     {
-        if (hitInfo.collider.CompareTag("MirrorWall") && laserIndices.Count < 3)
+        if (hitInfo.collider.CompareTag("MirrorWall") && laserIndices.Count < 2)
         {
+            isHitWall = true;
             Vector3 pos = hitInfo.point;
             Vector3 dir = Vector3.Reflect(direction, hitInfo.normal);
             
-            CastRay(pos, dir, laser);
+            CastRay(pos, dir, laser, 3);
         }
         else
         {
