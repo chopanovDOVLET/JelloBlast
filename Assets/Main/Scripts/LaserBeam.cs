@@ -8,7 +8,6 @@ public class LaserBeam
     private GameObject laserObj;
     private LineRenderer laser;
     private List<Vector3> laserIndices = new List<Vector3>();
-    private bool isHitWall;
 
     public LaserBeam(Vector3 pos, Vector3 dir, Material material)
     {
@@ -63,7 +62,6 @@ public class LaserBeam
     {
         if (hitInfo.collider.CompareTag("MirrorWall") && laserIndices.Count < 2)
         {
-            isHitWall = true;
             Vector3 pos = hitInfo.point;
             Vector3 dir = Vector3.Reflect(direction, hitInfo.normal);
             

@@ -348,8 +348,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 1.2, y: 1.2, z: 1.2}
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 7234767021827388417}
   - {fileID: 4776946751276024992}
@@ -419,7 +419,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   material: {fileID: 2100000, guid: 5c6c1dd15838893418d3b267aabbe7b9, type: 2}
   forceMagnitude: 10
-  minVelocity: 2
+  firstCollide: 0
+  minVelocity: 10
   childCount: 0
   childInShape:
   - {fileID: 0}

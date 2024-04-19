@@ -12,7 +12,7 @@ public class WarningLine : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("ShapeInBox"))
-            Debug.Log("GameOver");
+            ShapeController.Instance.ShowGameOverPanel();
     }
 
     private void OnTriggerStay(Collider other)
@@ -26,7 +26,7 @@ public class WarningLine : MonoBehaviour
                 else
                 {
                     stayTime = 0;
-                    Debug.Log("GameOver");
+                    ShapeController.Instance.ShowGameOverPanel();
                     isGameOver = true;
                 }
     }

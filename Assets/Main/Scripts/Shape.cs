@@ -161,11 +161,17 @@ public class Shape : MonoBehaviour
                     childInShape.RemoveAt(0);
                     otherShape.childInShape.RemoveAt(0);
 
-                    if (childInShape.Count == 1) 
-                        Destroy(gameObject);
-                        
-                    if (otherShape.childInShape.Count == 1) 
-                        Destroy(otherShape.gameObject);
+                    if (childInShape.Count == 1)
+                    {
+                        //Destroy(gameObject);
+                        CollectCandy(transform);
+                    }
+
+                    if (otherShape.childInShape.Count == 1)
+                    {
+                        //Destroy(otherShape.gameObject);
+                        CollectCandy(otherShape.transform);
+                    }
                 }
             }
         }
@@ -175,5 +181,23 @@ public class Shape : MonoBehaviour
     {
         yield return new WaitForSeconds(.75f);
         _rb.useGravity = true;
+    }
+    
+    private void CollectCandy(Transform candy)
+    {
+        ShapeController.Instance.CandyCounter();
+        Vector3 rotationAmount = new Vector3(0, -180, 0);
+        candy.GetComponent<Rigidbody>().isKinematic = true;
+        candy.DOLocalJump(candy.localPosition + Vector3.forward * 5, .7f, 1, 1.8f);
+        candy.DORotate(rotationAmount, 0.7f).SetEase(Ease.OutQuad);
+        candy.DOShakeScale(1f, 0.1f).OnComplete(() =>
+        {
+            candy.DOScale(Vector3.zero, 0.2f).OnComplete(() =>
+            {
+                candy.DOKill();
+                Destroy(candy.gameObject);
+            });
+        });
+        
     }
 }
