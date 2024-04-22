@@ -8,6 +8,7 @@ TagManager:
   - MirrorWall
   - WarningLine
   - ShapeInBox
+  - Ground
   layers:
   - Default
   - TransparentFX

@@ -12,84 +12,72 @@ public class Shape : MonoBehaviour
     private LaserBeam beam;
     private Rigidbody _rb; 
     private MeshCollider _mc;
+    private LineRenderer _lr;
     private Camera _camera;
     
     private Vector3 mouseDownPos;
     private Vector3 direction;
-    private float angle;
-    private bool isShoot;
-    private bool isTrajectory;
     private bool colliderEnter;
-
-    [SerializeField] Material material;
+    
     [SerializeField] float forceMagnitude = 5f;
-    public bool firstCollide;
-    public float minVelocity;
-    public int childCount;
-    public List<Transform> childInShape;
+    [SerializeField] List<Transform> childInShape;
 
-    private void Start()
+    public bool isShoot;
+    public bool isSelected;
+    public int mouseDownCount;
+    
+    private void Awake()
     {
         _rb = GetComponent<Rigidbody>();
         _mc = GetComponent<MeshCollider>();
+        _lr = GetComponent<LineRenderer>();
         _camera = Camera.main;
+    }
 
-        childCount = transform.childCount;
-        for (int i = 0; i < childCount; i++)
-            childInShape[i] = transform.GetChild(i);
+    private void Start()
+    {
+        for (int i = 0; i < transform.childCount; i++)
+            childInShape.Add(transform.GetChild(i));
 
-        int childShapeCount = childInShape.Count;
-        for (int i = 0; i < childShapeCount - childCount; i++)
-            childInShape.RemoveAt(childCount);
-        
         _mc.sharedMesh = childInShape[0].GetComponent<MeshCollider>().sharedMesh;
         direction = transform.forward;
         colliderEnter = false;
-        isTrajectory = false;
-    }
-
-    private void Update()
-    {
-        
-    }
-
-    private void FixedUpdate()
-    {
-        if (_rb.velocity.magnitude < minVelocity && !firstCollide)
-        {
-            Vector3 direction = _rb.velocity.normalized; // Normalize to get direction
-            Vector3 minimumVelocity = direction * minVelocity;
-            _rb.AddForce(minimumVelocity - _rb.velocity, ForceMode.VelocityChange);
-        }
+        isSelected = false;
+        mouseDownCount = 0;
     }
 
     #region DragAndShoot
         private void OnMouseDown()
         {
-            
-            foreach (var child in childInShape)
-                child.GetComponent<MeshCollider>().enabled = true;
-            
-            isTrajectory = true;
+            mouseDownCount++;
+            isSelected = (mouseDownCount >= 2) ? true : false;
             mouseDownPos = GetMousePosition();
+            if (!isShoot)
+                ShapeController.Instance.ChangeSelected(transform);
         }
 
         private void OnMouseDrag()
         {
             direction = mouseDownPos - GetMousePosition();
             
-            if (isTrajectory && !isShoot && direction.z > 0)
+            if (direction.z > 0 && isSelected)
             {
-                Destroy(GameObject.Find("Laser Beam"));
-                beam = new LaserBeam(transform.position, new Vector3(direction.x, 0, direction.z), material);
+                Vector3 lineDir = new Vector3(
+                    direction.x, 
+                    -Mathf.Abs(direction.z), 
+                    Mathf.Abs(direction.y) + 0.1f);
+                
+                RenderLine(Vector3.zero, lineDir);
             }
         }
 
         private void OnMouseUp()
         {
-            isTrajectory = false;
-            Destroy(GameObject.Find("Laser Beam"));
-            Shoot(mouseDownPos - GetMousePosition());
+            _lr.positionCount = 0;
+            if (!isShoot && (mouseDownPos - GetMousePosition()).z > 0 && isSelected)
+            {
+                Shoot(mouseDownPos - GetMousePosition());
+            }
         } 
         
         private Vector3 GetMousePosition()
@@ -105,38 +93,65 @@ public class Shape : MonoBehaviour
 
         private void Shoot(Vector3 Force)
         {
-            if (!isShoot && !isShoot && Force.z > 0)
-            {
-                Force = Vector3.ProjectOnPlane(Force, Vector3.up);
-                Vector3 velocity = new Vector3(Force.x, 0, Force.z) * forceMagnitude;
-                _rb.AddForce(velocity, ForceMode.Impulse);
-                _rb.constraints = RigidbodyConstraints.FreezeRotationX | 
-                                  RigidbodyConstraints.FreezeRotationY | 
-                                  RigidbodyConstraints.FreezePositionY;
-                //_rb.freezeRotation = true;
-                _mc.isTrigger = false;
-                isShoot = true;
+            Quaternion rotDir = Quaternion.AngleAxis(7f, Vector3.right);
+            Vector3 dir = rotDir * new Vector3(Force.x, 0, Force.z);
+            
+            _rb.AddForce(dir * forceMagnitude, ForceMode.Impulse);
+            _rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY;
+            isShoot = true;
 
-                ShapeController.Instance.moveCount--;
-                
-                if (ShapeController.Instance.moveCount < 1)
-                    ShapeController.Instance.CreateShapes(1.5f);
-                
-                transform.SetParent(ShapeController.Instance.shapeBoxParent);
+            
+            ShapeController.Instance.hasSelected = false;
+            foreach (var shape in ShapeController.Instance.shapePlaces)
+            {
+                if (shape.childCount > 0)
+                {
+                    StartCoroutine(Wait(shape));
+                    break;
+                }
             }
+
+
+            ShapeController.Instance.moveCount--;
+            ShapeController.Instance.levelMoveCount--;
+
+            if (ShapeController.Instance.levelMoveCount == 0)
+            {
+                ShapeController.Instance.ShowGameOverPanel();
+            }
+            ShapeController.Instance.levelMoveCountTxt.text = $"{ShapeController.Instance.levelMoveCount}";
+
+            if (ShapeController.Instance.moveCount < 1)
+                StartCoroutine(ShapeController.Instance.CreateShapes(.5f));
+            
+            transform.SetParent(ShapeController.Instance.shapeBoxParent);
+        }
+
+        IEnumerator Wait(Transform shape)
+        {
+            yield return new WaitForSeconds(.5f);
+            ShapeController.Instance.ChangeSelected(shape.GetChild(0));
         }
     #endregion
 
     private void OnCollisionExit(Collision other)
     {
-        if (other.collider.CompareTag("ShapeInBox")) 
+        if (other.collider.CompareTag("ShapeInBox"))
+        {
             colliderEnter = false;
+            other.collider.GetComponent<Shape>().colliderEnter = false;
+        }
+    }
+
+    IEnumerator CheckCollision(Shape other)
+    {
+        yield return new WaitForSeconds(.3f);
+        colliderEnter = false;
+        other.colliderEnter = false;
     }
 
     private void OnCollisionEnter(Collision other)
     {
-        firstCollide = true;
-        StartCoroutine(EnableGravity());
         if (other.collider.CompareTag("ShapeInBox"))
         {
             Shape otherShape = other.collider.GetComponent<Shape>();
@@ -152,6 +167,7 @@ public class Shape : MonoBehaviour
                     
                     colliderEnter = true;
                     otherShape.colliderEnter = true;
+                    //StartCoroutine(CheckCollision(otherShape));
                     
                     ShapeController.Instance.particles[0].transform.position = transform.position;
                     ShapeController.Instance.particles[0].Play();
@@ -177,27 +193,30 @@ public class Shape : MonoBehaviour
         }
     }
 
-    IEnumerator EnableGravity()
-    {
-        yield return new WaitForSeconds(.75f);
-        _rb.useGravity = true;
-    }
-    
     private void CollectCandy(Transform candy)
     {
         ShapeController.Instance.CandyCounter();
         Vector3 rotationAmount = new Vector3(0, -180, 0);
         candy.GetComponent<Rigidbody>().isKinematic = true;
-        candy.DOLocalJump(candy.localPosition + Vector3.forward * 5, .7f, 1, 1.8f);
-        candy.DORotate(rotationAmount, 0.7f).SetEase(Ease.OutQuad);
-        candy.DOShakeScale(1f, 0.1f).OnComplete(() =>
+        candy.DOLocalJump(candy.localPosition + Vector3.forward * 5, .7f, 1, .6f);
+        candy.DORotate(rotationAmount, 0.6f).SetEase(Ease.OutQuad);
+        candy.DOShakeScale(.6f, 0.1f).OnComplete(() =>
         {
-            candy.DOScale(Vector3.zero, 0.2f).OnComplete(() =>
+            candy.DOScale(Vector3.zero, 0.15f).OnComplete(() =>
             {
                 candy.DOKill();
                 Destroy(candy.gameObject);
             });
         });
+    }
+
+    private void RenderLine(Vector3 startPoint, Vector3 endPoint)
+    {
+        _lr.positionCount = 2;
+        Vector3[] points = new Vector3[2];
+        points[0] = startPoint;
+        points[1] = endPoint;
         
+        _lr.SetPositions(points);
     }
 }

@@ -6,7 +6,5 @@ using UnityEngine;
 
 public class UIController : MonoBehaviour
 {
-    public static UIController Instance { get; set; }
-
-    public TextMeshProUGUI candyAmountText;
+    public static UIController Instance { get; private set; }
 }
