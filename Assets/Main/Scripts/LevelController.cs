@@ -8,8 +8,8 @@ public class LevelController : MonoBehaviour
 {
     public static LevelController Instance { get; set; }
 
-    public Transform shapeBoxParent;
-    public Transform environment;
+    private Transform shapeBoxParent;
+    private Transform environment;
     public List<Level> levels;
     public int currentLevel;
 
@@ -24,18 +24,14 @@ public class LevelController : MonoBehaviour
         ShapeController.Instance.candyCount = levels[currentLevel].collectCandyAmount;
         ShapeController.Instance.levelMoveCount = levels[currentLevel].levelMoveCount;
 
-        ShapeController.Instance.candyAmountText.text = $"{ShapeController.Instance.candyCount}";
-        ShapeController.Instance.levelMoveCountTxt.text = $"{ShapeController.Instance.levelMoveCount}";
+        UIController.Instance.candyAmountText.text = $"{ShapeController.Instance.candyCount}";
+        UIController.Instance.levelMoveCountTxt.text = $"{ShapeController.Instance.levelMoveCount}";
 
         foreach (var bigShape in levels[currentLevel].bigShapes)
-        {
             Instantiate(bigShape, shapeBoxParent);
-        }
-        
+
         foreach (var obstacle in levels[currentLevel].obstacles)
-        {
             Instantiate(obstacle, environment);
-        }
     }
 
     public void LevelUp()

@@ -18,18 +18,13 @@ public class ShapeController : MonoBehaviour
     public Transform shapeBoxParent;
     public List<ParticleSystem> particles;
 
-    public int moveCount;
-    public int levelMoveCount;
-    public int candyCount;
     private Transform selectedShape;
-    public Transform selectedPlace;
-    public Transform oldPlace;
+    [HideInInspector] public int moveCount;
+    [HideInInspector] public int levelMoveCount;
+    [HideInInspector] public int candyCount;
+    [HideInInspector] public Transform selectedPlace;
+    [HideInInspector] public Transform oldPlace;
     public bool hasSelected;
-
-    public TextMeshProUGUI candyAmountText;
-    public TextMeshProUGUI levelMoveCountTxt;
-    public CanvasGroup gameOverPanel;
-    public CanvasGroup nextLevelPanel;
 
     private void Awake()
     {
@@ -109,44 +104,13 @@ public class ShapeController : MonoBehaviour
         candyCount--;
         
         if (candyCount >= 0)
-            candyAmountText.text = $"{candyCount}";
+            UIController.Instance.candyAmountText.text = $"{candyCount}";
         
         if (candyCount == 0)
         {
             LevelController.Instance.LevelUp();
-            ShowNextLevelPanel();
+            UIController.Instance.ShowNextLevelPanel();
         }
-    }
-
-    public void ShowGameOverPanel()
-    {
-        gameOverPanel.gameObject.SetActive(true);
-        gameOverPanel.DOFade(1f, .35f).SetEase(Ease.Linear);
-    }
-    
-    public void TryAgain()
-    {
-        gameOverPanel.DOFade(0f, .35f).SetEase(Ease.Linear).OnComplete(() =>
-        {
-            gameOverPanel.gameObject.SetActive(false);
-            SceneManager.LoadScene(0);
-        });
-    }
-    
-    public void ShowNextLevelPanel()
-    {
-        nextLevelPanel.gameObject.SetActive(true);
-        nextLevelPanel.DOFade(1f, .35f).SetEase(Ease.Linear);
-    }
-    
-    public void NextLevel()
-    {
-        
-        nextLevelPanel.DOFade(0f, .35f).SetEase(Ease.Linear).OnComplete(() =>
-        {
-            nextLevelPanel.gameObject.SetActive(false);
-            SceneManager.LoadScene(0);
-        });
     }
 }
 

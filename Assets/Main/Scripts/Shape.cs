@@ -117,9 +117,9 @@ public class Shape : MonoBehaviour
 
             if (ShapeController.Instance.levelMoveCount == 0)
             {
-                ShapeController.Instance.ShowGameOverPanel();
+                UIController.Instance.ShowGameOverPanel();
             }
-            ShapeController.Instance.levelMoveCountTxt.text = $"{ShapeController.Instance.levelMoveCount}";
+            UIController.Instance.levelMoveCountTxt.text = $"{ShapeController.Instance.levelMoveCount}";
 
             if (ShapeController.Instance.moveCount < 1)
                 StartCoroutine(ShapeController.Instance.CreateShapes(.5f));

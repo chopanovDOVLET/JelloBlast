@@ -202,10 +202,6 @@ MonoBehaviour:
   selectedPlace: {fileID: 1671537662}
   oldPlace: {fileID: 0}
   hasSelected: 0
-  candyAmountText: {fileID: 1710858621}
-  levelMoveCountTxt: {fileID: 1928249344}
-  gameOverPanel: {fileID: 211781205}
-  nextLevelPanel: {fileID: 358284469}
 --- !u!1 &14787204
 GameObject:
   m_ObjectHideFlags: 0
@@ -1472,6 +1468,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 82586496aacb2b04db996b01e9a8178c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  nextLevelPanel: {fileID: 358284469}
+  gameOverPanel: {fileID: 211781205}
+  candyAmountText: {fileID: 1710858621}
+  levelMoveCountTxt: {fileID: 1928249344}
 --- !u!1 &657224050
 GameObject:
   m_ObjectHideFlags: 0
@@ -1551,8 +1551,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a432c18b80247b542877556a2941d574, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  shapeBoxParent: {fileID: 381012030}
-  environment: {fileID: 46819058}
   levels:
   - collectCandyAmount: 10
     levelMoveCount: 25
@@ -1706,8 +1704,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 9215589}
-        m_TargetAssemblyTypeName: ShapeController, Assembly-CSharp
+      - m_Target: {fileID: 598002482}
+        m_TargetAssemblyTypeName: UIController, Assembly-CSharp
         m_MethodName: NextLevel
         m_Mode: 1
         m_Arguments:
@@ -2087,8 +2085,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 9215589}
-        m_TargetAssemblyTypeName: ShapeController, Assembly-CSharp
+      - m_Target: {fileID: 598002482}
+        m_TargetAssemblyTypeName: UIController, Assembly-CSharp
         m_MethodName: TryAgain
         m_Mode: 1
         m_Arguments:
@@ -2854,7 +2852,7 @@ GameObject:
   - component: {fileID: 1710858622}
   - component: {fileID: 1710858621}
   m_Layer: 0
-  m_Name: Text (TMP)
+  m_Name: CandyCounter
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
