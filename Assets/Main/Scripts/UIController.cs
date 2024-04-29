@@ -12,34 +12,86 @@ public class UIController : MonoBehaviour
     
     [Header("Panels")]
     public CanvasGroup nextLevelPanel;
-    public CanvasGroup gameOverPanel;
-    
-    [Header("Texts")]
-    public TextMeshProUGUI candyAmountText;
+    public CanvasGroup outOfSpacePanel;
+    public CanvasGroup outOfMovePanel;
+
+    [Header("Texts")] 
+    public TextMeshProUGUI currentLevelTxt;
+    public TextMeshProUGUI candyAmountTxt;
     public TextMeshProUGUI levelMoveCountTxt;
-    
+    public TextMeshProUGUI coinAmountTxt;
+    public TextMeshProUGUI warningCounterTxt;
+
+    [Header("Game Status")] 
+    public bool isShowingPanel;
+
     private void Awake()
     {
         Instance = this;
+        isShowingPanel = false;
     }
     
-    public void ShowGameOverPanel()
+    public void ShowOutOfSpacePanel()
     {
-        gameOverPanel.gameObject.SetActive(true);
-        gameOverPanel.DOFade(1f, .35f).SetEase(Ease.Linear);
+        isShowingPanel = true;
+        outOfSpacePanel.gameObject.SetActive(true);
+        outOfSpacePanel.DOFade(1f, .35f).SetEase(Ease.Linear);
     }
-    
-    public void TryAgain()
+
+    public void HideOutOfSpacePanel()
     {
-        gameOverPanel.DOFade(0f, .35f).SetEase(Ease.Linear).OnComplete(() =>
+        isShowingPanel = false;
+        coinAmountTxt.text = $"{LevelController.Instance.coinAmount}";
+        outOfSpacePanel.DOFade(0f, .35f).SetEase(Ease.Linear).OnComplete(() =>
         {
-            gameOverPanel.gameObject.SetActive(false);
+            outOfSpacePanel.gameObject.SetActive(false);
+        });
+    }
+
+    public void TryAgainOutOfSpace()
+    {
+        outOfSpacePanel.DOFade(0f, .35f).SetEase(Ease.Linear).OnComplete(() =>
+        {
+            outOfSpacePanel.gameObject.SetActive(false);
             SceneManager.LoadScene(0);
         });
     }
     
+    
+    
+    
+    public void ShowOutOfMovePanel()
+    {
+        isShowingPanel = true;
+        outOfMovePanel.gameObject.SetActive(true);
+        outOfMovePanel.DOFade(1f, .35f).SetEase(Ease.Linear);
+    }
+    
+    public void HideOutOfMovePanel()
+    {
+        isShowingPanel = false;
+        coinAmountTxt.text = $"{LevelController.Instance.coinAmount}";
+        levelMoveCountTxt.text = $"{ShapeController.Instance.levelMoveCount}";
+        outOfMovePanel.DOFade(0f, .35f).SetEase(Ease.Linear).OnComplete(() =>
+        {
+            outOfMovePanel.gameObject.SetActive(false);
+        });
+    }
+
+    public void TryAgainOutOfMove()
+    {
+        outOfMovePanel.DOFade(0f, .35f).SetEase(Ease.Linear).OnComplete(() =>
+        {
+            outOfMovePanel.gameObject.SetActive(false);
+            SceneManager.LoadScene(0);
+        });
+    }
+    
+    
+    
     public void ShowNextLevelPanel()
     {
+        isShowingPanel = true;
         nextLevelPanel.gameObject.SetActive(true);
         nextLevelPanel.DOFade(1f, .35f).SetEase(Ease.Linear);
     }

@@ -12,13 +12,21 @@ public class ShapeController : MonoBehaviour
     public static ShapeController Instance { get; private set; }
     
     [SerializeField] List<ShapeBody> shapePrefabs;
-    [SerializeField] List<Color> shapeColors;
-
-    public List<Transform> shapePlaces;
+    
+    [Header("Shape Materials")]
+    [SerializeField] List<Material> shapeMaterials;
+    
+    [Header("Shape Places")]
     public Transform shapeBoxParent;
+    public List<Transform> shapePlaces;
+    
+    [Header("Particles")]
+    [SerializeField] List<ParticleSystem> appearParticles;
+    [SerializeField] List<float> particleScale; 
     public List<ParticleSystem> particles;
 
     private Transform selectedShape;
+    private Transform oldShape;
     [HideInInspector] public int moveCount;
     [HideInInspector] public int levelMoveCount;
     [HideInInspector] public int candyCount;
@@ -38,7 +46,7 @@ public class ShapeController : MonoBehaviour
         StartCoroutine(CreateShapes(0));
         hasSelected = false;
 
-        StartCoroutine(Wait(0.9f));
+        StartCoroutine(AutoSelect(0.9f));
     }
 
     public IEnumerator CreateShapes(float sec)
@@ -46,32 +54,50 @@ public class ShapeController : MonoBehaviour
         yield return new WaitForSeconds(sec);
         
         int shapeRandom = Random.Range(0, 3);
-
-        foreach (var place in shapePlaces)
+        for (int i = 0; i < shapePlaces.Count; i++)
         {
-            place.localScale = new Vector3(.01f, .01f, .01f);
+            shapePlaces[i].localScale = new Vector3(.01f, .01f, .01f);
             
             int randomShapeBody = Random.Range(0, shapePrefabs[0].shapeBody.Count);
-            Transform newShape = Instantiate(shapePrefabs[0].shapeBody[randomShapeBody], place).transform;
+            Transform newShape = Instantiate(shapePrefabs[0].shapeBody[randomShapeBody], shapePlaces[i]).transform;
 
-            for (int j = 0; j < newShape.childCount - 1; j++)
-                newShape.GetChild(j).GetComponent<Renderer>().material.color = shapeColors[Random.Range(0, 8)];
+            int colorsAmount = LevelController.Instance.levels[LevelController.Instance.currentLevel].colorsAmount;
+            for (int j = 0; j < newShape.childCount - 1; j++) 
+                newShape.GetChild(j).GetComponent<Renderer>().sharedMaterial = shapeMaterials[Random.Range(0, colorsAmount)];
 
-            yield return new WaitForSeconds(.02f);
-            place.DOScale(Vector3.one, .35f);
+            float x = particleScale[newShape.childCount - 2];
+            appearParticles[i].transform.localScale = new Vector3(x, x, x);
+            appearParticles[i].Play();
+            shapePlaces[i].DOScale(Vector3.one, .5f).SetEase(Ease.OutBack);
         }
 
         moveCount = 3;
-        StartCoroutine(Wait(0.7f));
+        //yield return new WaitForSeconds(.5f);
+        StartCoroutine(AutoSelect(0.7f));
     }
 
-    IEnumerator Wait(float sec)
+    IEnumerator AutoSelect(float sec)
     {
         yield return new WaitForSeconds(sec);
         if (shapePlaces[1].childCount > 0)
             ChangeSelected(shapePlaces[1].GetChild(0));
     }
 
+    public void ChangeShapesStatus(bool status)
+    {
+        if (selectedPlace.childCount > 0)
+        {
+            selectedPlace.GetChild(0).GetComponent<Shape>().isClickable = status;
+        }
+        foreach (var place in shapePlaces)
+        {
+            if (place.childCount > 0)
+            {
+                place.GetChild(0).GetComponent<Shape>().isClickable = status;
+            }
+        }
+    }
+    
     public void ChangeSelected(Transform newSelected)
     {
         if (!hasSelected)
@@ -80,22 +106,38 @@ public class ShapeController : MonoBehaviour
             oldPlace = newSelected.parent;
             newSelected.GetComponent<Shape>().mouseDownCount = 1;
             newSelected.SetParent(selectedPlace);
-            newSelected.DOLocalMove(Vector3.zero, .35f);
+            
+            ChangeShapesStatus(false);
+            newSelected.DOLocalMove(Vector3.zero, .35f).SetEase(Ease.OutExpo).OnComplete(() =>
+            {
+                ChangeShapesStatus(true);
+            });
             selectedShape = newSelected;
         } 
         else if (!newSelected.GetComponent<Shape>().isSelected)
         {
             // Unselect old Shape
             selectedShape.GetComponent<Shape>().mouseDownCount = 0;
-            selectedShape.GetComponent<Shape>().isSelected = false;
             selectedShape.SetParent(oldPlace);
-            selectedShape.DOLocalMove(Vector3.zero, .35f);
+            selectedShape.GetComponent<Shape>().isSelected = false;
+
+            ChangeShapesStatus(false);
+            
+            selectedShape.DOLocalMove(Vector3.zero, .35f).SetEase(Ease.OutExpo).OnComplete(() =>
+            {
+                ChangeShapesStatus(true);
+            });
             
             // Select new Shape
             oldPlace = newSelected.parent;
             newSelected.SetParent(selectedPlace);
-            newSelected.DOLocalMove(Vector3.zero, .35f);
-            selectedShape = newSelected;
+            
+            ChangeShapesStatus(false);
+            newSelected.DOLocalMove(Vector3.zero, .35f).SetEase(Ease.OutExpo).OnComplete(() =>
+            {
+                ChangeShapesStatus(true);
+                selectedShape = newSelected;
+            });
         }
     }
 
@@ -104,7 +146,7 @@ public class ShapeController : MonoBehaviour
         candyCount--;
         
         if (candyCount >= 0)
-            UIController.Instance.candyAmountText.text = $"{candyCount}";
+            UIController.Instance.candyAmountTxt.text = $"{candyCount}";
         
         if (candyCount == 0)
         {

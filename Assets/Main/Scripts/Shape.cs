@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using DG.Tweening;
 using Unity.VisualScripting;
 using UnityEditor;
@@ -17,15 +18,16 @@ public class Shape : MonoBehaviour
     
     private Vector3 mouseDownPos;
     private Vector3 direction;
-    private bool colliderEnter;
     
     [SerializeField] float forceMagnitude = 5f;
     [SerializeField] List<Transform> childInShape;
 
+    public bool isClickable;
     public bool isShoot;
     public bool isSelected;
     public int mouseDownCount;
-    
+    public bool isColliderEnter;
+
     private void Awake()
     {
         _rb = GetComponent<Rigidbody>();
@@ -41,42 +43,57 @@ public class Shape : MonoBehaviour
 
         _mc.sharedMesh = childInShape[0].GetComponent<MeshCollider>().sharedMesh;
         direction = transform.forward;
-        colliderEnter = false;
+
+        isClickable = true;
         isSelected = false;
         mouseDownCount = 0;
+    }
+
+    private void Update()
+    {
+        if (_rb.IsSleeping())
+        {
+            _rb.WakeUp();
+        }
     }
 
     #region DragAndShoot
         private void OnMouseDown()
         {
-            mouseDownCount++;
-            isSelected = (mouseDownCount >= 2) ? true : false;
-            mouseDownPos = GetMousePosition();
-            if (!isShoot)
-                ShapeController.Instance.ChangeSelected(transform);
+            if (isClickable && !UIController.Instance.isShowingPanel)
+            {
+                mouseDownCount++;
+                isSelected = (mouseDownCount >= 2) ? true : false;
+                mouseDownPos = GetMousePosition();
+                if (!isShoot)
+                    ShapeController.Instance.ChangeSelected(transform);
+            }
         }
 
         private void OnMouseDrag()
         {
             direction = mouseDownPos - GetMousePosition();
             
-            if (direction.z > 0 && isSelected)
-            {
-                Vector3 lineDir = new Vector3(
-                    direction.x, 
-                    -Mathf.Abs(direction.z), 
-                    Mathf.Abs(direction.y) + 0.1f);
-                
-                RenderLine(Vector3.zero, lineDir);
-            }
+            // Trajectory
+            // if (direction.z > 0 && isSelected)
+            // {
+            //     Vector3 lineDir = new Vector3(
+            //         direction.x, 
+            //         -Mathf.Abs(direction.z), 
+            //         Mathf.Abs(direction.y) + 0.1f);
+            //     
+            //     RenderLine(Vector3.zero, lineDir);
+            // }
         }
 
         private void OnMouseUp()
         {
-            _lr.positionCount = 0;
-            if (!isShoot && (mouseDownPos - GetMousePosition()).z > 0 && isSelected)
+            // Trajectory
+            // _lr.positionCount = 0;
+            
+            if (!isShoot && (GetMousePosition() - mouseDownPos).z > 0 && isSelected && isClickable)
             {
-                Shoot(mouseDownPos - GetMousePosition());
+                Shoot(GetMousePosition() - mouseDownPos);
             }
         } 
         
@@ -94,37 +111,41 @@ public class Shape : MonoBehaviour
         private void Shoot(Vector3 Force)
         {
             Quaternion rotDir = Quaternion.AngleAxis(7f, Vector3.right);
-            Vector3 dir = rotDir * new Vector3(Force.x, 0, Force.z);
+            Vector3 swipeDirection = rotDir * new Vector3(Force.x, 0, Force.z);
+            Vector3 targetVelocity = swipeDirection.normalized * forceMagnitude;
+            Vector3 velocityChange = targetVelocity - _rb.velocity;
+            // Vector3 dir = rotDir * new Vector3(Force.x, 0, Force.z);
             
-            _rb.AddForce(dir * forceMagnitude, ForceMode.Impulse);
+            _rb.AddForce(velocityChange, ForceMode.VelocityChange);
             _rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY;
             isShoot = true;
 
+            ShapeController.Instance.moveCount--;
+            ShapeController.Instance.levelMoveCount--;
+            UIController.Instance.levelMoveCountTxt.text = $"{ShapeController.Instance.levelMoveCount}";
             
-            ShapeController.Instance.hasSelected = false;
-            foreach (var shape in ShapeController.Instance.shapePlaces)
+            if (!UIController.Instance.isShowingPanel)
             {
-                if (shape.childCount > 0)
+                ShapeController.Instance.hasSelected = false;
+                foreach (var shape in ShapeController.Instance.shapePlaces)
                 {
-                    StartCoroutine(Wait(shape));
-                    break;
+                    if (shape.childCount > 0)
+                    {
+                        StartCoroutine(Wait(shape));
+                        break;
+                    }
                 }
             }
 
-
-            ShapeController.Instance.moveCount--;
-            ShapeController.Instance.levelMoveCount--;
-
-            if (ShapeController.Instance.levelMoveCount == 0)
-            {
-                UIController.Instance.ShowGameOverPanel();
-            }
-            UIController.Instance.levelMoveCountTxt.text = $"{ShapeController.Instance.levelMoveCount}";
-
             if (ShapeController.Instance.moveCount < 1)
-                StartCoroutine(ShapeController.Instance.CreateShapes(.5f));
+                StartCoroutine(ShapeController.Instance.CreateShapes(.2f));
             
             transform.SetParent(ShapeController.Instance.shapeBoxParent);
+            
+            if (ShapeController.Instance.levelMoveCount == 0)
+            {
+                UIController.Instance.ShowOutOfMovePanel();
+            }
         }
 
         IEnumerator Wait(Transform shape)
@@ -134,60 +155,68 @@ public class Shape : MonoBehaviour
         }
     #endregion
 
-    private void OnCollisionExit(Collision other)
+    private void OnCollisionStay(Collision other)
     {
-        if (other.collider.CompareTag("ShapeInBox"))
+        if (other.collider.CompareTag("ShapeInBox") && isColliderEnter)
         {
-            colliderEnter = false;
-            other.collider.GetComponent<Shape>().colliderEnter = false;
+            DestroySameColor(other);
+            Time.timeScale = 1f;
+            other.collider.GetComponent<Shape>().isColliderEnter = false;
         }
+        isColliderEnter = true;
     }
-
-    IEnumerator CheckCollision(Shape other)
-    {
-        yield return new WaitForSeconds(.3f);
-        colliderEnter = false;
-        other.colliderEnter = false;
-    }
-
+    
     private void OnCollisionEnter(Collision other)
     {
-        if (other.collider.CompareTag("ShapeInBox"))
+        if (other.collider.CompareTag("ShapeInBox") && isColliderEnter)
         {
-            Shape otherShape = other.collider.GetComponent<Shape>();
-            if (childInShape.Count > 0 && otherShape.childInShape.Count > 0)
-            {
-                Color ownColor = childInShape[0].GetComponent<Renderer>().material.color;
-                Color otherColor = otherShape.childInShape[0].GetComponent<Renderer>().material.color;
+            DestroySameColor(other);
+            Time.timeScale = 1f;
+            other.collider.GetComponent<Shape>().isColliderEnter = false;
+        }
+        isColliderEnter = true;
+    }
+
+    private void DestroySameColor(Collision other)
+    {
+        Time.timeScale = 0.01f;
+        Shape otherShape = other.collider.GetComponent<Shape>();
+        if (childInShape.Count > 0 && otherShape.childInShape.Count > 0)
+        {
+            Material ownMaterial = childInShape[0].GetComponent<Renderer>().sharedMaterial;
+            Material otherMaterial = otherShape.childInShape[0].GetComponent<Renderer>().sharedMaterial;
                 
-                if (ownColor == otherColor && !otherShape.colliderEnter)
+            if (ownMaterial == otherMaterial)
+            {
+                int indexShape = (childInShape.Count == 1) ? 0 : 1;
+                int indexOtherShape = (otherShape.childInShape.Count == 1) ? 0 : 1;
+                _mc.sharedMesh = childInShape[indexShape].GetComponent<MeshCollider>().sharedMesh;
+                otherShape._mc.sharedMesh = otherShape.childInShape[indexOtherShape].GetComponent<MeshCollider>().sharedMesh;
+                
+                ShapeController.Instance.particles[0].transform.position = transform.position;
+                ShapeController.Instance.particles[0].Play();
+                
+                if (childInShape.Count > 1)
                 {
-                    _mc.sharedMesh = childInShape[1].GetComponent<MeshCollider>().sharedMesh;
-                    otherShape._mc.sharedMesh = otherShape.childInShape[1].GetComponent<MeshCollider>().sharedMesh;
-                    
-                    colliderEnter = true;
-                    otherShape.colliderEnter = true;
-                    //StartCoroutine(CheckCollision(otherShape));
-                    
-                    ShapeController.Instance.particles[0].transform.position = transform.position;
-                    ShapeController.Instance.particles[0].Play();
+                    Time.timeScale = 1;
                     Destroy(childInShape[0].gameObject);
-                    Destroy(otherShape.childInShape[0].gameObject);
-                    
                     childInShape.RemoveAt(0);
+                }
+                
+                if (otherShape.childInShape.Count > 1)
+                {
+                    Destroy(otherShape.childInShape[0].gameObject);
                     otherShape.childInShape.RemoveAt(0);
+                }
 
-                    if (childInShape.Count == 1)
-                    {
-                        //Destroy(gameObject);
-                        CollectCandy(transform);
-                    }
-
-                    if (otherShape.childInShape.Count == 1)
-                    {
-                        //Destroy(otherShape.gameObject);
-                        CollectCandy(otherShape.transform);
-                    }
+                if (childInShape.Count == 1)
+                {
+                    CollectCandy(transform);
+                }
+                    
+                if (otherShape.childInShape.Count == 1)
+                {
+                    CollectCandy(otherShape.transform);
                 }
             }
         }
