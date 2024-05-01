@@ -33,6 +33,8 @@ public class ShapeController : MonoBehaviour
     [HideInInspector] public Transform selectedPlace;
     [HideInInspector] public Transform oldPlace;
     public bool hasSelected;
+    
+    public int collisionDetectCount;
 
     private void Awake()
     {
@@ -72,7 +74,6 @@ public class ShapeController : MonoBehaviour
         }
 
         moveCount = 3;
-        //yield return new WaitForSeconds(.5f);
         StartCoroutine(AutoSelect(0.7f));
     }
 

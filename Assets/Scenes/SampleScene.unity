@@ -209,6 +209,7 @@ MonoBehaviour:
   selectedPlace: {fileID: 1671537662}
   oldPlace: {fileID: 0}
   hasSelected: 0
+  collisionDetectCount: 0
 --- !u!1 &34513721
 GameObject:
   m_ObjectHideFlags: 0
@@ -11482,7 +11483,7 @@ MonoBehaviour:
   shapeBoxParent: {fileID: 381012030}
   environment: {fileID: 46819058}
   levels:
-  - collectCandyAmount: 10
+  - collectCandyAmount: 99
     levelMoveCount: 99
     colorsAmount: 2
     obstacles: []
@@ -17802,63 +17803,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1412401682}
   m_CullTransparentMesh: 1
---- !u!1001 &1459626597
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 167046, guid: 6062cf74dd326b146b31d28120ade333, type: 3}
-      propertyPath: m_Name
-      value: SwordHitRedLegacy
-      objectReference: {fileID: 0}
-    - target: {fileID: 417408, guid: 6062cf74dd326b146b31d28120ade333, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: -25
-      objectReference: {fileID: 0}
-    - target: {fileID: 417408, guid: 6062cf74dd326b146b31d28120ade333, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 417408, guid: 6062cf74dd326b146b31d28120ade333, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 417408, guid: 6062cf74dd326b146b31d28120ade333, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 417408, guid: 6062cf74dd326b146b31d28120ade333, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 417408, guid: 6062cf74dd326b146b31d28120ade333, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 417408, guid: 6062cf74dd326b146b31d28120ade333, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 417408, guid: 6062cf74dd326b146b31d28120ade333, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 417408, guid: 6062cf74dd326b146b31d28120ade333, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 417408, guid: 6062cf74dd326b146b31d28120ade333, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 6062cf74dd326b146b31d28120ade333, type: 3}
 --- !u!1 &1476013900
 GameObject:
   m_ObjectHideFlags: 0
@@ -22838,63 +22782,6 @@ ParticleSystem:
         m_PostInfinity: 2
         m_RotationOrder: 4
     vectorLabel1_3: W
---- !u!1001 &1604884301
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 194074, guid: 07012348f33b18f4d8c779ad2fe3cec8, type: 3}
-      propertyPath: m_Name
-      value: SwordHitBlueLegacy
-      objectReference: {fileID: 0}
-    - target: {fileID: 496574, guid: 07012348f33b18f4d8c779ad2fe3cec8, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: -25
-      objectReference: {fileID: 0}
-    - target: {fileID: 496574, guid: 07012348f33b18f4d8c779ad2fe3cec8, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 496574, guid: 07012348f33b18f4d8c779ad2fe3cec8, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 496574, guid: 07012348f33b18f4d8c779ad2fe3cec8, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 496574, guid: 07012348f33b18f4d8c779ad2fe3cec8, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 496574, guid: 07012348f33b18f4d8c779ad2fe3cec8, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 496574, guid: 07012348f33b18f4d8c779ad2fe3cec8, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 496574, guid: 07012348f33b18f4d8c779ad2fe3cec8, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 496574, guid: 07012348f33b18f4d8c779ad2fe3cec8, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 496574, guid: 07012348f33b18f4d8c779ad2fe3cec8, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 07012348f33b18f4d8c779ad2fe3cec8, type: 3}
 --- !u!1 &1624718060
 GameObject:
   m_ObjectHideFlags: 0
@@ -32706,8 +32593,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1671537662}
-  - component: {fileID: 1671537664}
-  - component: {fileID: 1671537663}
   m_Layer: 2
   m_Name: Selected
   m_TagString: Untagged
@@ -32730,40 +32615,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: -83, y: 0, z: 0}
---- !u!114 &1671537663
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1671537661}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 549e097bc0a9ed341a73d3ad76629140, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  isTriggered: 0
---- !u!65 &1671537664
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1671537661}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 3.0543132, y: 2.9215105, z: 0.58909196}
-  m_Center: {x: -0.043688774, y: -0.047992114, z: 0.20545322}
 --- !u!1 &1710858619
 GameObject:
   m_ObjectHideFlags: 0
@@ -88445,8 +88296,6 @@ SceneRoots:
   - {fileID: 511405332}
   - {fileID: 933755089}
   - {fileID: 46819058}
-  - {fileID: 1604884301}
-  - {fileID: 1459626597}
   - {fileID: 3481360668103128827}
   - {fileID: 629210129}
   - {fileID: 509398040}
