@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
@@ -19,11 +20,13 @@ public class ShapeController : MonoBehaviour
     [Header("Shape Places")]
     public Transform shapeBoxParent;
     public List<Transform> shapePlaces;
+    public List<Transform> controlPoints;
     
     [Header("Particles")]
     [SerializeField] List<ParticleSystem> appearParticles;
-    [SerializeField] List<float> particleScale; 
-    public List<ParticleSystem> particles;
+    [SerializeField] List<float> particleScale;
+    public List<ParticleSystem> destroyParticles;
+    public Transform particleBox;
 
     private Transform selectedShape;
     private Transform oldShape;
@@ -33,8 +36,6 @@ public class ShapeController : MonoBehaviour
     [HideInInspector] public Transform selectedPlace;
     [HideInInspector] public Transform oldPlace;
     public bool hasSelected;
-    
-    public int collisionDetectCount;
 
     private void Awake()
     {
@@ -48,7 +49,7 @@ public class ShapeController : MonoBehaviour
         StartCoroutine(CreateShapes(0));
         hasSelected = false;
 
-        StartCoroutine(AutoSelect(0.9f));
+        StartCoroutine(AutoSelectCenter(0.9f));
     }
 
     public IEnumerator CreateShapes(float sec)
@@ -64,24 +65,48 @@ public class ShapeController : MonoBehaviour
             Transform newShape = Instantiate(shapePrefabs[0].shapeBody[randomShapeBody], shapePlaces[i]).transform;
 
             int colorsAmount = LevelController.Instance.levels[LevelController.Instance.currentLevel].colorsAmount;
-            for (int j = 0; j < newShape.childCount - 1; j++) 
-                newShape.GetChild(j).GetComponent<Renderer>().sharedMaterial = shapeMaterials[Random.Range(0, colorsAmount)];
+            for (int j = 0; j < newShape.childCount - 1; j++)
+            {
+                int colorIndex = Random.Range(0, colorsAmount);
+                newShape.GetChild(j).GetComponent<Renderer>().sharedMaterial = shapeMaterials[colorIndex];
+                newShape.GetChild(j).GetComponent<ShapeChild>().destroyParticle = destroyParticles[j];
+            }
 
             float x = particleScale[newShape.childCount - 2];
             appearParticles[i].transform.localScale = new Vector3(x, x, x);
             appearParticles[i].Play();
             shapePlaces[i].DOScale(Vector3.one, .5f).SetEase(Ease.OutBack);
+            
+            // Set StartPoint, ControlPoint, EndPoint
+            Shape shape = newShape.GetComponent<Shape>();
+            shape.controlPoint = controlPoints[i];
+            shape.startPoint = shapePlaces[i];
+            shape.endPoint = selectedPlace;
+
         }
 
         moveCount = 3;
-        StartCoroutine(AutoSelect(0.7f));
+        StartCoroutine(AutoSelectCenter(0.35f));
     }
-
-    IEnumerator AutoSelect(float sec)
+    
+    public IEnumerator AutoSelectCenter(float sec)
     {
         yield return new WaitForSeconds(sec);
         if (shapePlaces[1].childCount > 0)
             ChangeSelected(shapePlaces[1].GetChild(0));
+    }
+
+    public IEnumerator AutoSelect()
+    {
+        yield return new WaitForSeconds(.15f);
+        foreach (var place in shapePlaces)
+        {
+            if (place.childCount > 0)
+            {
+                ChangeSelected(place.GetChild(0));
+                break;
+            }
+        }
     }
 
     public void ChangeShapesStatus(bool status)
@@ -104,41 +129,97 @@ public class ShapeController : MonoBehaviour
         if (!hasSelected)
         {
             hasSelected = true;
+            ChangeShapesStatus(false);
+            newSelected.GetComponent<Shape>().isClick = true;
+            
             oldPlace = newSelected.parent;
             newSelected.GetComponent<Shape>().mouseDownCount = 1;
             newSelected.SetParent(selectedPlace);
-            
-            ChangeShapesStatus(false);
-            newSelected.DOLocalMove(Vector3.zero, .35f).SetEase(Ease.OutExpo).OnComplete(() =>
-            {
-                ChangeShapesStatus(true);
-            });
             selectedShape = newSelected;
         } 
         else if (!newSelected.GetComponent<Shape>().isSelected)
         {
             // Unselect old Shape
+            ChangeShapesStatus(false);
+            selectedShape.GetComponent<Shape>().isClick = true;
             selectedShape.GetComponent<Shape>().mouseDownCount = 0;
             selectedShape.SetParent(oldPlace);
             selectedShape.GetComponent<Shape>().isSelected = false;
 
-            ChangeShapesStatus(false);
-            
-            selectedShape.DOLocalMove(Vector3.zero, .35f).SetEase(Ease.OutExpo).OnComplete(() =>
-            {
-                ChangeShapesStatus(true);
-            });
-            
             // Select new Shape
+            ChangeShapesStatus(false);
+            newSelected.GetComponent<Shape>().isClick = true;
             oldPlace = newSelected.parent;
             newSelected.SetParent(selectedPlace);
-            
-            ChangeShapesStatus(false);
-            newSelected.DOLocalMove(Vector3.zero, .35f).SetEase(Ease.OutExpo).OnComplete(() =>
+            selectedShape = newSelected;
+        }
+    }
+
+    private IEnumerator DestroyRemainShapes()
+    {
+        yield return new WaitForSeconds(.5f);
+        List<Transform> shapes = new List<Transform>(shapeBoxParent.childCount);
+        for (int i = 0; i < shapeBoxParent.childCount; i++)
+        {
+            shapeBoxParent.GetChild(i).GetComponent<Rigidbody>().isKinematic = true;
+            shapes.Add(shapeBoxParent.GetChild(i));
+        }
+        shapes.Reverse();
+        
+        for (int i = 0; i < shapes.Count; i++)
+        {
+            if (shapes[i] != null && shapes[i].GetChild(0).GetComponent<ShapeChild>() != null)
             {
-                ChangeShapesStatus(true);
-                selectedShape = newSelected;
-            });
+                Material mat = shapes[i].GetChild(0).GetComponent<Renderer>().sharedMaterial;
+                ParticleSystem part = shapes[i].GetChild(0).GetComponent<ShapeChild>().destroyParticle;
+             
+                part.GetComponent<ParticleSystemRenderer>().material = mat;
+                part.transform.GetChild(0).GetComponent<ParticleSystemRenderer>().material = mat;
+        
+                ParticleSystem destroyParticle = Instantiate(part, shapes[i]);
+                destroyParticle.transform.SetParent(particleBox);
+                destroyParticle.Play();
+        
+                // Destroy the GameObject after the particle lifetime
+                Destroy(shapes[i].gameObject);
+                Destroy(destroyParticle.gameObject, destroyParticle.main.duration);
+                yield return new WaitForSeconds(.05f);
+            }
+        }
+        yield return new WaitForSeconds(.5f);
+        UIController.Instance.ShowNextLevelPanel();
+    }
+
+    public IEnumerator ClearHalfSpace()
+    {
+        yield return new WaitForSeconds(1f);
+        List<Transform> shapes = new List<Transform>(shapeBoxParent.childCount);
+        for (int i = 0; i < shapeBoxParent.childCount / 2; i++)
+        {
+            shapeBoxParent.GetChild(i).GetComponent<Rigidbody>().isKinematic = true;
+            shapes.Add(shapeBoxParent.GetChild(i));
+        }
+        shapes.Reverse();
+        
+        for (int i = 0; i < shapes.Count; i++)
+        {
+            if (shapes[i] != null && shapes[i].GetChild(0).GetComponent<ShapeChild>() != null)
+            {
+                Material mat = shapes[i].GetChild(0).GetComponent<Renderer>().sharedMaterial;
+                ParticleSystem part = shapes[i].GetChild(0).GetComponent<ShapeChild>().destroyParticle;
+             
+                part.GetComponent<ParticleSystemRenderer>().material = mat;
+                part.transform.GetChild(0).GetComponent<ParticleSystemRenderer>().material = mat;
+        
+                ParticleSystem destroyParticle = Instantiate(part, shapes[i]);
+                destroyParticle.transform.SetParent(particleBox);
+                destroyParticle.Play();
+        
+                // Destroy the GameObject after the particle lifetime
+                Destroy(shapes[i].gameObject);
+                Destroy(destroyParticle.gameObject, destroyParticle.main.duration);
+                yield return new WaitForSeconds(.05f);
+            }
         }
     }
 
@@ -146,13 +227,11 @@ public class ShapeController : MonoBehaviour
     {
         candyCount--;
         
-        if (candyCount >= 0)
-            UIController.Instance.candyAmountTxt.text = $"{candyCount}";
+        UIController.Instance.candyAmountTxt.text = $"{candyCount}";
         
         if (candyCount == 0)
         {
-            LevelController.Instance.LevelUp();
-            UIController.Instance.ShowNextLevelPanel();
+            StartCoroutine(DestroyRemainShapes());
         }
     }
 }

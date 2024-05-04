@@ -10,7 +10,7 @@ public class WarningLine : MonoBehaviour
     
     [SerializeField] Material warningMaterial;
     private Material defaultMaterial;
-    private float stayTime;
+    public float stayTime;
     public bool isGameOver = false;
 
     private void Awake()
@@ -58,7 +58,8 @@ public class WarningLine : MonoBehaviour
     IEnumerator Wait(Collider other)
     {
         yield return new WaitForSeconds(0.5f);
-        other.tag = "ShapeInBox";
+        if (other.GetComponent<MeshCollider>() != null) 
+            other.tag = "ShapeInBox";
     }
 
     private void OnTriggerExit(Collider other)

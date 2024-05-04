@@ -5,10 +5,12 @@ TagManager:
   serializedVersion: 2
   tags:
   - Shape
-  - MirrorWall
   - WarningLine
   - ShapeInBox
   - Ground
+  - Backside
+  - Obstacle
+  - Selected
   layers:
   - Default
   - TransparentFX

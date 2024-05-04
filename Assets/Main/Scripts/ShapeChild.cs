@@ -6,4 +6,5 @@ using UnityEngine;
 public class ShapeChild : MonoBehaviour
 {
     public bool isOutSide;
+    public ParticleSystem destroyParticle;
 }

@@ -9,11 +9,19 @@ using UnityEngine.SceneManagement;
 public class UIController : MonoBehaviour
 {
     public static UIController Instance { get; private set; }
-    
-    [Header("Panels")]
-    public CanvasGroup nextLevelPanel;
-    public CanvasGroup outOfSpacePanel;
-    public CanvasGroup outOfMovePanel;
+
+    [Header("Panels")] 
+    public CanvasGroup background;
+    public RectTransform nextLevelPanel;
+    public RectTransform outOfSpacePanel;
+    public RectTransform outOfMovePanel;
+
+    [Header("Buttons")] 
+    public RectTransform nextLevelBtn;
+    public RectTransform tryAgainMoveBtn;
+    public RectTransform tryAgainSpaceBtn;
+    public RectTransform continueMoveBtn;
+    public RectTransform continueSpaceBtn;
 
     [Header("Texts")] 
     public TextMeshProUGUI currentLevelTxt;
@@ -33,16 +41,24 @@ public class UIController : MonoBehaviour
     
     public void ShowOutOfSpacePanel()
     {
-        isShowingPanel = true;
-        outOfSpacePanel.gameObject.SetActive(true);
-        outOfSpacePanel.DOFade(1f, .35f).SetEase(Ease.Linear);
+        if (!isShowingPanel)
+        {
+            isShowingPanel = true;
+            background.DOFade(1f, .45f).SetEase(Ease.OutBack);
+            
+            outOfSpacePanel.localScale = Vector3.zero;
+            outOfSpacePanel.gameObject.SetActive(true);
+            outOfSpacePanel.DOScale(Vector3.one, .45f).SetEase(Ease.OutBack);
+        }
     }
 
     public void HideOutOfSpacePanel()
     {
         isShowingPanel = false;
         coinAmountTxt.text = $"{LevelController.Instance.coinAmount}";
-        outOfSpacePanel.DOFade(0f, .35f).SetEase(Ease.Linear).OnComplete(() =>
+        
+        background.DOFade(0f, .35f).SetEase(Ease.InBack);
+        outOfSpacePanel.DOScale(Vector3.zero, .35f).SetEase(Ease.InBack).OnComplete(() =>
         {
             outOfSpacePanel.gameObject.SetActive(false);
         });
@@ -50,11 +66,12 @@ public class UIController : MonoBehaviour
 
     public void TryAgainOutOfSpace()
     {
-        outOfSpacePanel.DOFade(0f, .35f).SetEase(Ease.Linear).OnComplete(() =>
+        background.DOFade(0f, .35f).SetEase(Ease.InBack);
+        outOfSpacePanel.DOScale(Vector3.zero, .35f).SetEase(Ease.InBack).OnComplete(() =>
         {
             outOfSpacePanel.gameObject.SetActive(false);
             SceneManager.LoadScene(0);
-        });
+        });;
     }
     
     
@@ -62,9 +79,15 @@ public class UIController : MonoBehaviour
     
     public void ShowOutOfMovePanel()
     {
-        isShowingPanel = true;
-        outOfMovePanel.gameObject.SetActive(true);
-        outOfMovePanel.DOFade(1f, .35f).SetEase(Ease.Linear);
+        if (!isShowingPanel)
+        {
+            isShowingPanel = true;
+            background.DOFade(1f, .45f).SetEase(Ease.OutBack);
+            
+            outOfMovePanel.localScale = Vector3.zero;
+            outOfMovePanel.gameObject.SetActive(true);
+            outOfMovePanel.DOScale(Vector3.one, .45f).SetEase(Ease.OutBack);
+        }
     }
     
     public void HideOutOfMovePanel()
@@ -72,7 +95,9 @@ public class UIController : MonoBehaviour
         isShowingPanel = false;
         coinAmountTxt.text = $"{LevelController.Instance.coinAmount}";
         levelMoveCountTxt.text = $"{ShapeController.Instance.levelMoveCount}";
-        outOfMovePanel.DOFade(0f, .35f).SetEase(Ease.Linear).OnComplete(() =>
+        
+        background.DOFade(0f, .35f).SetEase(Ease.InBack);
+        outOfMovePanel.DOScale(Vector3.zero, .35f).SetEase(Ease.InBack).OnComplete(() =>
         {
             outOfMovePanel.gameObject.SetActive(false);
         });
@@ -80,7 +105,8 @@ public class UIController : MonoBehaviour
 
     public void TryAgainOutOfMove()
     {
-        outOfMovePanel.DOFade(0f, .35f).SetEase(Ease.Linear).OnComplete(() =>
+        background.DOFade(0f, .35f).SetEase(Ease.InBack);
+        outOfMovePanel.DOScale(Vector3.zero, .35f).SetEase(Ease.InBack).OnComplete(() =>
         {
             outOfMovePanel.gameObject.SetActive(false);
             SceneManager.LoadScene(0);
@@ -91,17 +117,31 @@ public class UIController : MonoBehaviour
     
     public void ShowNextLevelPanel()
     {
-        isShowingPanel = true;
-        nextLevelPanel.gameObject.SetActive(true);
-        nextLevelPanel.DOFade(1f, .35f).SetEase(Ease.Linear);
+        if (!isShowingPanel)
+        {
+            isShowingPanel = true;
+            background.DOFade(1f, .45f).SetEase(Ease.OutBack);
+            
+            nextLevelPanel.gameObject.SetActive(true);
+            nextLevelPanel.localScale = Vector3.zero;
+            nextLevelPanel.DOScale(Vector3.one, .45f).SetEase(Ease.OutBack);
+            
+            nextLevelBtn.localScale = Vector3.zero;
+            nextLevelBtn.DOScale(Vector3.one, .2f).SetEase(Ease.Linear).SetDelay(.2f);
+        }
     }
     
     public void NextLevel()
     {
-        nextLevelPanel.DOFade(0f, .35f).SetEase(Ease.Linear).OnComplete(() =>
-        {
+        LevelController.Instance.LevelUp();
+        
+        background.DOFade(0f, .35f).SetEase(Ease.InBack);
+        nextLevelPanel.DOScale(Vector3.zero, .35f).SetEase(Ease.InBack).OnComplete(() =>
+        {;
             nextLevelPanel.gameObject.SetActive(false);
             SceneManager.LoadScene(0);
         });
+        
+        nextLevelBtn.DOScale(Vector3.zero, .15f).SetEase(Ease.Linear);
     }
 }

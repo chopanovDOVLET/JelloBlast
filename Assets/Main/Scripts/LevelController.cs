@@ -56,13 +56,7 @@ public class LevelController : MonoBehaviour
             PlayerPrefs.SetInt("Coin", coinAmount);
             UIController.Instance.HideOutOfSpacePanel();
             WarningLine.Instance.isGameOver = false;
-            for (int i = 0; i < (int)(ShapeController.Instance.shapeBoxParent.childCount / 3); i++)
-            {
-                ShapeController.Instance.shapeBoxParent.GetChild(i).DOScale(new Vector3(.01f, .01f, .01f), .35f).OnComplete(() =>
-                {
-                    Destroy(ShapeController.Instance.shapeBoxParent.GetChild(i).gameObject);
-                });
-            }
+            StartCoroutine(ShapeController.Instance.ClearHalfSpace());
         }
     }
     
@@ -72,8 +66,8 @@ public class LevelController : MonoBehaviour
         {
             coinAmount -= 100;
             PlayerPrefs.SetInt("Coin", coinAmount);
-            UIController.Instance.HideOutOfMovePanel();
             ShapeController.Instance.levelMoveCount = 10;
+            UIController.Instance.HideOutOfMovePanel();
             WarningLine.Instance.isGameOver = false;
         }
     }
